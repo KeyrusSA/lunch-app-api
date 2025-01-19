@@ -1,4 +1,6 @@
+using API.Data;
 using API.Extensions;
+using API.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,8 @@ builder.Services.AddApplicationServices(builder.Configuration);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 
 var app = builder.Build();
 

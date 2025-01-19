@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using API.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Data;
 
@@ -10,12 +11,15 @@ public class DataContext : DbContext
     }
 
     public DbSet<WeatherForecast> WeatherForecasts { get; set; }
+    public DbSet<MenuItem> MenuItems { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<WeatherForecast>();
+        modelBuilder.Entity<MenuItem>();
     }
 
 
