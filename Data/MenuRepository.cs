@@ -44,11 +44,12 @@ namespace API.Data
             return menuItem;
         }
 
-        public async Task<bool> DeleteMenuItem(MenuItem menuItem)
+        public async Task<bool> DeleteMenuItem(int id)
         {
             try
             {
-                dbSet.Update(menuItem);
+                var item = await dbSet.FindAsync(id);
+                dbSet.Remove(item);
                 await _dataContext.SaveChangesAsync();
                 return true;
             }

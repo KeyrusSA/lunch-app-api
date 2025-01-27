@@ -26,10 +26,10 @@ namespace API.Controllers
 
         private static readonly string _apiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyA3Hcj5JgE70M3NXQOkx8ScZ65-QDUWn04";
 
-        [HttpPost("ExtractMenuItems")]
-        public async Task<string> Prompt()
+        [HttpPost("UploadMenuItems")]
+        public async Task<List<MenuItem>> Prompt(string prompt, string filePath)
         {
-            string pdfFilePath = "C:\\Users\\JordonPillay\\Source\\Repos\\lunch-app-api\\Files\\13-17 January menu.pdf";
+            string pdfFilePath = filePath; //"C:\\Users\\JordonPillay\\Source\\Repos\\lunch-app-api\\Files\\13-17 January menu.pdf";
             string base64EncodedPdf = ConvertPdfToBase64(pdfFilePath);
 
             GeminiRequestBody request = new GeminiRequestBody
@@ -50,8 +50,7 @@ namespace API.Controllers
                             },
                             new Part
                             {
-                                text = "Analyze the pdf document and return a list of JSON objects like this: MenuItem {Date: \"string\", Caterer:\"EatFresh\",ItemName:\"string\", MainMeal: \"bool\"} " +
-                                " for each of the menu items in the PDF. Format the Date part into this dd-mm-yyyy (2025). Concise answer and plain text only."
+                                text = prompt,
                             }
                         }
                     }
@@ -79,15 +78,16 @@ namespace API.Controllers
                     {
                         item.DayOfWeek = DateTime.ParseExact(item.Date, "dd-MM-yyyy", null, DateTimeStyles.None).ToString("dddd");
                         item.MainMeal = true;
-                        _menuRepository.AddMenuItem(item);
+                        await _menuRepository.AddMenuItem(item);
                     }
-                    return "All menu items added!";
+
+                    return await _menuRepository.GetAllMenuItems();
                 }
                 else
                 {
                     // Handle the error
                     Console.WriteLine($"Error: {response.StatusCode}");
-                    return await response.Content.ReadAsStringAsync();
+                    return new List<MenuItem>();
                 }
             }
         }
