@@ -1,4 +1,5 @@
-﻿using API.Entities;
+﻿using API.DTOs;
+using API.Entities;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,11 +30,20 @@ namespace API.Controllers
         }
 
         [HttpPost("AddOrder")]
-        public async Task<string> AddOrder([FromBody] Order order)
+        public async Task<string> AddOrder([FromBody] OrderDTO order)
         {
             try
             {
-                await _orderRepository.AddOrder(order);
+                Order userOrder = new Order()
+                {
+                    Caterer = order.Caterer,
+                    User = order.User,
+                    DayOfWeek = order.DayOfTheWeek,
+                    Date = order.OrderDate == null ? DateTime.Now.Date : (DateTime)order.OrderDate,
+                    Main = order.Main,
+                    Side = order.Side
+                };
+                await _orderRepository.AddOrder(userOrder);
                 return "Order Added Successfully!";
             }
             catch (Exception ex)
