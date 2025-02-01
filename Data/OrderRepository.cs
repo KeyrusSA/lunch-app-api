@@ -29,11 +29,11 @@ namespace API.Data
             return order;
         }
 
-        public async Task<bool> DeleteOrder(string user, DateTime date)
+        public async Task<bool> DeleteOrder(string user, string dayOfWeek)
         {
             try
             {
-                var item = await dbSet.Where(x => x.User.ToUpper() == user && x.Date == date).FirstOrDefaultAsync();
+                var item = await dbSet.Where(x => x.User.ToUpper() == user && x.DayOfWeek == dayOfWeek).OrderByDescending(x => x.Date).FirstOrDefaultAsync();
                 dbSet.Remove(item);
                 await _dataContext.SaveChangesAsync();
                 return true;

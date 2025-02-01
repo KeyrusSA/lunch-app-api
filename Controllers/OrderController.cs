@@ -42,14 +42,14 @@ namespace API.Controllers
             }
         }
 
-        [HttpDelete("DeleteOrder/{date}")]
-        public async Task<string> DeleteMenuItem([FromRoute] string date, [FromBody] string user)
+        [HttpDelete("DeleteOrder/{dayOfWeek}")]
+        public async Task<string> DeleteMenuItem([FromRoute] string dayOfWeek, [FromBody] string user)
         {
             try
             {
 
-                await _orderRepository.DeleteOrder(user, DateTime.Parse(date));
-                return "Item Deleted Successfully!";
+                await _orderRepository.DeleteOrder(user, dayOfWeek);
+                return "Order Deleted Successfully!";
             }
             catch (Exception ex)
             {
