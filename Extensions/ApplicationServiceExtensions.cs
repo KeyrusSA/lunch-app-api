@@ -12,7 +12,15 @@ public static class ApplicationServiceExtensions
         {
             opt.UseSqlServer(config.GetConnectionString("DefaultConnection"));
         });
-        services.AddCors();
+        services.AddCors(options =>
+        {
+            options.AddPolicy("CorsPolicy", builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            });
+        });
 
         return services;
     }
