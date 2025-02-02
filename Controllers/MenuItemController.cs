@@ -24,12 +24,25 @@ namespace API.Controllers
             _menuRepository = menuRepository;
         }
 
-        [HttpGet("GetAllMenuItems")]
-        public async Task<List<MenuItem>> GetAllMenuItems()
+        [HttpGet("GetAllMainMenuItems")]
+        public async Task<List<MenuItem>> GetAllMainMenuItems(DateTime date)
         {
             try
             {
-                return await _menuRepository.GetAllMenuItems();
+                return await _menuRepository.GetAllMainMenuItemsByDate(date);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        [HttpGet("GetAllSideMenuItems")]
+        public async Task<List<MenuItem>> GetAllSideMenuItems(DateTime date)
+        {
+            try
+            {
+                return await _menuRepository.GetAllSideMenuItemsByDate(date);
             }
             catch (Exception ex)
             {
@@ -77,6 +90,19 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 return $"An error occurred while trying to delete item";
+            }
+        }
+
+        [HttpGet("GetMenuItemById")]
+        public async Task<MenuItem> GetMenuItemByUsername([FromRoute] int id)
+        {
+            try
+            {
+                return await _menuRepository.GetMenuItemByUsername(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
     }

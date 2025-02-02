@@ -58,5 +58,23 @@ namespace API.Data
                 return false;
             }
         }
+
+        public async Task<List<MenuItem>> GetAllMainMenuItemsByDate(DateTime date)
+        {
+            var result = await dbSet.Where(x => x.Date == date.ToString("yyyy-MM-dd") && x.IsMainMeal == true).ToListAsync();
+            return result;
+            
+        }
+
+        public Task<List<MenuItem>> GetAllSideMenuItemsByDate(DateTime date) 
+        {
+            var result = dbSet.Where(x => x.Date == date.ToString("yyyy-MM-dd") && x.IsSideMeal == true).ToListAsync();
+            return result;
+        }
+
+        public Task<MenuItem> GetMenuItemByUsername(int id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
