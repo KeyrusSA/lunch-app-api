@@ -20,9 +20,8 @@ namespace API.Controllers
             _menuRepository = menuRepository;
         }
 
-        private static readonly string _apiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?"; // use gemini api key here
+        private static readonly string _apiEndpoint = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={Environment.GetEnvironmentVariable("APIKey")}"; 
 
-        //dont think we need this
         [HttpPost("save-menu")]
         public async Task<IActionResult> SaveMenu([FromBody] TextRequest request)
         {
@@ -33,7 +32,6 @@ namespace API.Controllers
 
             try
             {
-                // format using Gemini
                 GeminiRequestBody geminiRequest = new GeminiRequestBody
                 {
                     contents = new List<Content>
@@ -45,8 +43,7 @@ namespace API.Controllers
                                 new Part
                                 {
                                     text = $"Today is {DateTime.Now}." + "Using this menu " + request.Text + ". Return a list of JSON objects like this: MenuItem {Date: \"string\", Caterer:\"string\",ItemName:\"string\", IsMainMeal: \"bool\",IsSideMeal: \"bool\"} " +
-                                           ".Format the Date part into this dd-mm-yyyy. Every meal is a main meal so set IsMainMeal to true and IsSideMeal to false. The Caterer name is EatFresh. " + "The Date value should always start from the next week. No past dates or current date is allowed. " +
-                                           "Example: if it is Thursday then the Date will start from the Date value of the following Monday." +
+                                           ".Format the Date part into this dd-mm-yyyy. Every meal is a main meal so set IsMainMeal to true and IsSideMeal to false. The Caterer name is EatFresh. " + $"The Date value should always start from the next week from now {DateTime.Now}." +
                                            "Concise answer and plain text only."
                                 }
                             }
@@ -66,20 +63,9 @@ namespace API.Controllers
                         string responseContent = await response.Content.ReadAsStringAsync();
                         GeminiResponseBody geminiResponse = JsonSerializer.Deserialize<GeminiResponseBody>(responseContent);
 
-                        // Extract the response text from Gemini
                         string responseText = geminiResponse.candidates[0].content.parts[0].text;
 
-                        //write to db
                         List<MenuItem> menuItems = JsonSerializer.Deserialize<List<MenuItem>>(ExtractJsonData(geminiResponse.candidates[0].content.parts[0].text));
-
-                        /*
-                         For the Date field:
-                            * Check what the current date is for context
-                            * If you are uploading a menu on Friday then the menu items apply for next week
-                            * If you upload on thursday then its the same
-                            * the Date should now be less than the current date (i.e. you cant upload a menu for the past)
-                        */
-
 
                         foreach (var item in menuItems)
                         {
@@ -90,7 +76,6 @@ namespace API.Controllers
                             await _menuRepository.AddMenuItem(item);
                         }
 
-                        // Return the response text
                         return Ok(new { status = "success", data = responseText });
                     }
                     else
@@ -100,13 +85,6 @@ namespace API.Controllers
                         return StatusCode((int)response.StatusCode, new { status = "error", message = errorContent });
                     }
                 }
-
-
-                // Simulate processing of the text
-                var processedText = $"Processed text: {request.Text}";
-
-                // Return the mock response
-                return Ok(new { status = "success", data = processedText });
             }
             catch (System.Exception ex)
             {
