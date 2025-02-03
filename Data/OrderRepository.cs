@@ -28,12 +28,18 @@ namespace API.Data
             _dataContext.SaveChanges();
             return order;
         }
+        public async Task<Order> UpdateOrder(Order order)
+        {
+            dbSet.Update(order);
+            _dataContext.SaveChanges();
+            return order;
+        }
 
-        public async Task<bool> DeleteOrder(string user, string dayOfWeek)
+        public async Task<bool> DeleteOrder(Order order)
         {
             try
             {
-                var item = await dbSet.Where(x => x.User.ToUpper() == user && x.DayOfWeek == dayOfWeek).OrderByDescending(x => x.Date).FirstOrDefaultAsync();
+                var item = await dbSet.Where(x => x.User.ToUpper() == order.User && x.Date == order.Date).FirstOrDefaultAsync();
                 dbSet.Remove(item);
                 await _dataContext.SaveChangesAsync();
                 return true;

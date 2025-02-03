@@ -24,12 +24,13 @@ namespace API.Controllers
             _menuRepository = menuRepository;
         }
 
-        [HttpGet("GetAllMainMenuItems")]
-        public async Task<List<MenuItem>> GetAllMainMenuItems(DateTime date)
+        [HttpGet("GetAllMainMenuItems/{fetchDate}")]
+        public async Task<List<MenuItem>> GetAllMainMenuItems([FromRoute] string fetchDate)
         {
             try
             {
-                return await _menuRepository.GetAllMainMenuItemsByDate(date);
+                DateTime currentDate = DateTime.Parse(fetchDate);
+                return await _menuRepository.GetAllMainMenuItemsByDate(currentDate);
             }
             catch (Exception ex)
             {
@@ -38,7 +39,7 @@ namespace API.Controllers
         }
 
         [HttpGet("GetAllSideMenuItems")]
-        public async Task<List<MenuItem>> GetAllSideMenuItems(DateTime date)
+        public async Task<List<MenuItem>> GetAllSideMenuItems([FromHeader] DateTime date)
         {
             try
             {

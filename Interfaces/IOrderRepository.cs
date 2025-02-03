@@ -6,6 +6,7 @@ namespace API.Interfaces
     {
         Task<Order> GetOrderByUser(string user);
         Task<Order> AddOrder(Order order);
-        Task<bool> DeleteOrder(string user, string dayOfWeek);
+        Task<Order> UpdateOrder(Order order);
+        Task<bool> DeleteOrder(Order order);
     }
 }

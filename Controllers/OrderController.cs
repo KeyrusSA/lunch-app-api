@@ -51,14 +51,40 @@ namespace API.Controllers
                 return $"An error occurred while trying to add order";
             }
         }
-
-        [HttpDelete("DeleteOrder/{dayOfWeek}")]
-        public async Task<string> DeleteMenuItem([FromRoute] string dayOfWeek, [FromBody] string user)
+        [HttpPost("UpdateOrder")]
+        public async Task<string> UpdateOrder([FromBody] OrderDTO order)
         {
             try
             {
+                Order userOrder = new Order()
+                {
+                    Caterer = order.Caterer,
+                    User = order.User,
+                    DayOfWeek = order.DayOfTheWeek,
+                    Date = order.OrderDate == null ? DateTime.Now.Date : (DateTime)order.OrderDate,
+                    Main = order.Main,
+                    Side = order.Side
+                };
+                await _orderRepository.UpdateOrder(userOrder);
+                return "Order Updated Successfully!";
+            }
+            catch (Exception ex)
+            {
+                return $"An error occurred while trying to add order";
+            }
+        }
 
-                await _orderRepository.DeleteOrder(user, dayOfWeek);
+        [HttpDelete("DeleteOrder")]
+        public async Task<string> DeleteMenuItem([FromBody] OrderDTO order)
+        {
+            try
+            {
+                Order userOrder = new Order()
+                {
+                    User = order.User,
+                    Date = order.OrderDate == null ? DateTime.Now.Date : (DateTime)order.OrderDate,
+                };
+                await _orderRepository.DeleteOrder(userOrder);
                 return "Order Deleted Successfully!";
             }
             catch (Exception ex)
