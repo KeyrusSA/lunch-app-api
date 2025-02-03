@@ -158,68 +158,68 @@ namespace API.Controllers
         }
 
         //user uploads a menu
-        [HttpPost("upload-menu")]
-        public async Task<IActionResult> UploadMenu([FromBody] TextRequest request)
-        {
-            if (string.IsNullOrEmpty(request.Text))
-            {
-                return BadRequest(new { status = "error", message = "No text provided" });
-            }
+        //[HttpPost("upload-menu")]
+        //public async Task<IActionResult> UploadMenu([FromBody] TextRequest request)
+        //{
+        //    if (string.IsNullOrEmpty(request.Text))
+        //    {
+        //        return BadRequest(new { status = "error", message = "No text provided" });
+        //    }
 
-            try
-            {
-                // Create the Gemini request body with the specified prompt
-                GeminiRequestBody geminiRequest = new GeminiRequestBody
-                {
-                    contents = new List<Content>
-            {
-                new Content
-                {
-                    parts = new List<Part>
-                    {
-                        new Part
-                        {
-                            text = "I'm providing you with a menu. " +
-                            "Pull out the menu items for monday. " +
-                            "Then prompt me to click the save button to save menu if mondays menu items look correct. If theres an issue say that whats submitted doesnt look correct" +
-                            "Here is the menu: \n" + request.Text
-                        }
-                    }
-                }
-            }
-                };
+        //    try
+        //    {
+        //        // Create the Gemini request body with the specified prompt
+        //        GeminiRequestBody geminiRequest = new GeminiRequestBody
+        //        {
+        //            contents = new List<Content>
+        //    {
+        //        new Content
+        //        {
+        //            parts = new List<Part>
+        //            {
+        //                new Part
+        //                {
+        //                    text = "I'm providing you with a menu. " +
+        //                    "Pull out the menu items for monday. " +
+        //                    "Then prompt me to click the save button to save menu if mondays menu items look correct. If theres an issue say that whats submitted doesnt look correct" +
+        //                    "Here is the menu: \n" + request.Text
+        //                }
+        //            }
+        //        }
+        //    }
+        //        };
 
-                using (HttpClient client = new HttpClient())
-                {
-                    string jsonData = JsonSerializer.Serialize(geminiRequest);
-                    var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+        //        using (HttpClient client = new HttpClient())
+        //        {
+        //            string jsonData = JsonSerializer.Serialize(geminiRequest);
+        //            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
-                    HttpResponseMessage response = await client.PostAsync(_apiEndpoint, content);
+        //            HttpResponseMessage response = await client.PostAsync(_apiEndpoint, content);
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string responseContent = await response.Content.ReadAsStringAsync();
-                        GeminiResponseBody geminiResponse = JsonSerializer.Deserialize<GeminiResponseBody>(responseContent);
+        //            if (response.IsSuccessStatusCode)
+        //            {
+        //                string responseContent = await response.Content.ReadAsStringAsync();
+        //                GeminiResponseBody geminiResponse = JsonSerializer.Deserialize<GeminiResponseBody>(responseContent);
 
-                        // Extract the response text from Gemini
-                        string responseText = geminiResponse.candidates[0].content.parts[0].text;
+        //                // Extract the response text from Gemini
+        //                string responseText = geminiResponse.candidates[0].content.parts[0].text;
 
-                        // Return the response text
-                        return Ok(new { status = "success", data = responseText });
-                    }
-                    else
-                    {
-                        // Handle the error
-                        string errorContent = await response.Content.ReadAsStringAsync();
-                        return StatusCode((int)response.StatusCode, new { status = "error", message = errorContent });
-                    }
-                }
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, new { status = "error", message = ex.Message });
-            }
-        }
+        //                // Return the response text
+        //                return Ok(new { status = "success", data = responseText });
+        //            }
+        //            else
+        //            {
+        //                // Handle the error
+        //                string errorContent = await response.Content.ReadAsStringAsync();
+        //                return StatusCode((int)response.StatusCode, new { status = "error", message = errorContent });
+        //            }
+        //        }
+        //    }
+        //    catch (System.Exception ex)
+        //    {
+        //        return StatusCode(500, new { status = "error", message = ex.Message });
+        //    }
+        //}
 
         public static string ExtractJsonData(string input)
         {
