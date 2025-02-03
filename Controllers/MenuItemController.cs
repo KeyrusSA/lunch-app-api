@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using API.Interfaces;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Globalization;
+using API.DTOs;
 
 namespace API.Controllers
 {
@@ -25,12 +26,24 @@ namespace API.Controllers
         }
 
         [HttpGet("GetAllMainMenuItems/{fetchDate}")]
-        public async Task<List<MenuItem>> GetAllMainMenuItems([FromRoute] string fetchDate)
+        public async Task<List<MainMenuItemDto>> GetAllMainMenuItems([FromRoute] string fetchDate)
         {
             try
             {
                 DateTime currentDate = DateTime.Parse(fetchDate);
-                return await _menuRepository.GetAllMainMenuItemsByDate(currentDate);
+                var result =  await _menuRepository.GetAllMainMenuItemsByDate(currentDate);
+                List<MainMenuItemDto> list = new List<MainMenuItemDto>();
+                foreach (var item in result)
+                {
+                    MainMenuItemDto dto = new MainMenuItemDto();
+                    dto.date = item.Date;
+                    dto.dayOfWeek = item.DayOfWeek;
+                    dto.menu = item.Caterer;
+                    dto.section = item.Section;
+                    dto.item = item.ItemName;
+                    list.Add(dto);
+                }
+                return list;
             }
             catch (Exception ex)
             {
