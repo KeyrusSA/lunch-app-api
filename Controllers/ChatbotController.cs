@@ -115,8 +115,8 @@ namespace API.Controllers
                         new Part
                         {
                             text = "I'm providing you with a menu. " +
-                            "Pull out the menu items for monday. " +
-                            "Then prompt me to click the save button to save menu if mondays menu items look correct. If theres an issue say that whats submitted doesnt look correct" +
+                            "Pull out the menu items. " +
+                            "Then prompt me to click the save button to save menu the menu items look correct. If theres an issue say that whats submitted doesnt look correct" +
                             "Here is the menu: \n" + request.Text
                         }
                     }
