@@ -52,11 +52,23 @@ namespace API.Controllers
         }
 
         [HttpGet("GetAllSideMenuItems")]
-        public async Task<List<MenuItem>> GetAllSideMenuItems([FromHeader] DateTime date)
+        public async Task<List<MainMenuItemDto>> GetAllSideMenuItems()
         {
             try
             {
-                return await _menuRepository.GetAllSideMenuItemsByDate(date);
+                var result = await _menuRepository.GetAllSideMenuItems();
+                List<MainMenuItemDto> list = new List<MainMenuItemDto>();
+                foreach (var item in result)
+                {
+                    MainMenuItemDto dto = new MainMenuItemDto();
+                    dto.date = item.Date;
+                    dto.dayOfWeek = item.DayOfWeek;
+                    dto.menu = item.Caterer;
+                    dto.section = item.Section;
+                    dto.item = item.ItemName;
+                    list.Add(dto);
+                }
+                return list;
             }
             catch (Exception ex)
             {

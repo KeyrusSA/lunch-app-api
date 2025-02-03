@@ -69,10 +69,10 @@ namespace API.Data
             return result.Count > 0 ? result : null;
         }
 
-        public async Task<List<MenuItem>> GetAllSideMenuItemsByDate(DateTime date) 
+        public async Task<List<MenuItem>> GetAllSideMenuItems() 
         {
             var result = await dbSet
-                .Where(x => (x.Date == date.ToString("yyyy-MM-dd") || x.Date == "Any") && x.IsMainMeal == true)
+                .Where(x => x.IsSideMeal == true)
                 .ToListAsync();
 
             return result.Count > 0 ? result : null;

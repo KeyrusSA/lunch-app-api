@@ -6,7 +6,7 @@ namespace API.Interfaces
     public interface IMenuRepository
     {
         Task<List<MenuItem>> GetAllMainMenuItemsByDate(DateTime date);
-        Task<List<MenuItem>> GetAllSideMenuItemsByDate(DateTime date);
+        Task<List<MenuItem>> GetAllSideMenuItems();
         Task<MenuItem> AddMenuItem(MenuItem menuItem);
         Task<bool> DeleteMenuItem(int id);
         Task<MenuItem> UpdateMenuItem(MenuItem menuItem);
