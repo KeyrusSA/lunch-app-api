@@ -73,6 +73,7 @@ namespace API.Controllers
                             item.IsMainMeal = true;
                             item.IsSideMeal = false;
                             item.Caterer = "EatFresh";
+                            item.Section = item.Caterer;
                             await _menuRepository.AddMenuItem(item);
                         }
 
