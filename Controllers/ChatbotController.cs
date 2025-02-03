@@ -76,7 +76,7 @@ namespace API.Controllers
                             await _menuRepository.AddMenuItem(item);
                         }
 
-                        return Ok(new { status = "success", data = responseText });
+                        return Ok(new { status = "success", data = "Menu has been saved successfully!" });
                     }
                     else
                     {
