@@ -43,7 +43,7 @@ namespace API.Controllers
                                 new Part
                                 {
                                     text = $"Today is {DateTime.Now}." + "Using this menu " + request.Text + ". Return a list of JSON objects like this: MenuItem {Date: \"string\", Caterer:\"string\",ItemName:\"string\", IsMainMeal: \"bool\",IsSideMeal: \"bool\"} " +
-                                           ".Format the Date part into this dd-mm-yyyy. Every meal is a main meal so set IsMainMeal to true and IsSideMeal to false. The Caterer name is EatFresh. " + $"The Date value should always start from the next week from now {DateTime.Now}." +
+                                           ".Format the Date part into this yyyy-MM-dd. Every meal is a main meal so set IsMainMeal to true and IsSideMeal to false. The Caterer name is EatFresh. " + $"The Date value should always start from the next week from now {DateTime.Now}." +
                                            "Concise answer and plain text only."
                                 }
                             }
@@ -69,7 +69,7 @@ namespace API.Controllers
 
                         foreach (var item in menuItems)
                         {
-                            item.DayOfWeek = DateTime.ParseExact(item.Date, "dd-MM-yyyy", null, DateTimeStyles.None).ToString("dddd");
+                            item.DayOfWeek = DateTime.ParseExact(item.Date, "yyyy-MM-dd", null, DateTimeStyles.None).ToString("dddd");
                             item.IsMainMeal = true;
                             item.IsSideMeal = false;
                             item.Caterer = "EatFresh";
