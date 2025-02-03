@@ -3,6 +3,9 @@ using System.Text.Json;
 using System.Text;
 using API.Classes;
 using API.Interfaces;
+using System.Text.RegularExpressions;
+using API.Entities;
+using System.Globalization;
 
 namespace API.Controllers
 {
@@ -17,7 +20,7 @@ namespace API.Controllers
             _menuRepository = menuRepository;
         }
 
-        private static readonly string _apiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyBTqlyurDAZK__hJPJNHWWBctiRvbBS8Sc"; // use gemini api key here
+        private static readonly string _apiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?"; // use gemini api key here
 
         //dont think we need this
         [HttpPost("save-menu")]
@@ -30,6 +33,75 @@ namespace API.Controllers
 
             try
             {
+                // format using Gemini
+                GeminiRequestBody geminiRequest = new GeminiRequestBody
+                {
+                    contents = new List<Content>
+                    {
+                        new Content
+                        {
+                            parts = new List<Part>
+                            {
+                                new Part
+                                {
+                                    text = $"Today is {DateTime.Now}." + "Using this menu " + request.Text + ". Return a list of JSON objects like this: MenuItem {Date: \"string\", Caterer:\"string\",ItemName:\"string\", IsMainMeal: \"bool\",IsSideMeal: \"bool\"} " +
+                                           ".Format the Date part into this dd-mm-yyyy. Every meal is a main meal so set IsMainMeal to true and IsSideMeal to false. The Caterer name is EatFresh. " + "The Date value should always start from the next week. No past dates or current date is allowed. " +
+                                           "Example: if it is Thursday then the Date will start from the Date value of the following Monday." +
+                                           "Concise answer and plain text only."
+                                }
+                            }
+                        }
+                    }
+                };
+
+                using (HttpClient client = new HttpClient())
+                {
+                    string jsonData = JsonSerializer.Serialize(geminiRequest);
+                    var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                    HttpResponseMessage response = await client.PostAsync(_apiEndpoint, content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseContent = await response.Content.ReadAsStringAsync();
+                        GeminiResponseBody geminiResponse = JsonSerializer.Deserialize<GeminiResponseBody>(responseContent);
+
+                        // Extract the response text from Gemini
+                        string responseText = geminiResponse.candidates[0].content.parts[0].text;
+
+                        //write to db
+                        List<MenuItem> menuItems = JsonSerializer.Deserialize<List<MenuItem>>(ExtractJsonData(geminiResponse.candidates[0].content.parts[0].text));
+
+                        /*
+                         For the Date field:
+                            * Check what the current date is for context
+                            * If you are uploading a menu on Friday then the menu items apply for next week
+                            * If you upload on thursday then its the same
+                            * the Date should now be less than the current date (i.e. you cant upload a menu for the past)
+                        */
+
+
+                        foreach (var item in menuItems)
+                        {
+                            item.DayOfWeek = DateTime.ParseExact(item.Date, "dd-MM-yyyy", null, DateTimeStyles.None).ToString("dddd");
+                            item.IsMainMeal = true;
+                            item.IsSideMeal = false;
+                            item.Caterer = "EatFresh";
+                            await _menuRepository.AddMenuItem(item);
+                        }
+
+                        // Return the response text
+                        return Ok(new { status = "success", data = responseText });
+                    }
+                    else
+                    {
+                        // Handle the error
+                        string errorContent = await response.Content.ReadAsStringAsync();
+                        return StatusCode((int)response.StatusCode, new { status = "error", message = errorContent });
+                    }
+                }
+
+
                 // Simulate processing of the text
                 var processedText = $"Processed text: {request.Text}";
 
@@ -131,7 +203,7 @@ namespace API.Controllers
                         {
                             text = "I'm providing you with a menu. " +
                             "Pull out the menu items for monday. " +
-                            "Then prompt me to click the save button to save menu if mondays menu items look correct. If theres an issue say that whats submitted doesnt look correct" + 
+                            "Then prompt me to click the save button to save menu if mondays menu items look correct. If theres an issue say that whats submitted doesnt look correct" +
                             "Here is the menu: \n" + request.Text
                         }
                     }
@@ -170,6 +242,21 @@ namespace API.Controllers
                 return StatusCode(500, new { status = "error", message = ex.Message });
             }
         }
+
+        public static string ExtractJsonData(string input)
+        {
+            string pattern = @"^```json\n(.*)```\n$";
+            Match match = Regex.Match(input, pattern, RegexOptions.Singleline);
+
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+            else
+            {
+                return string.Empty; // Or throw an exception if no match is found
+            }
+        }
     }
 }
 
@@ -190,20 +277,5 @@ public class TextRequest
 //    {
 //        Console.WriteLine($"Error converting PDF to Base64: {ex.Message}");
 //        return string.Empty;
-//    }
-//}
-
-//public static string ExtractJsonData(string input)
-//{
-//    string pattern = @"^```json\n(.*)```\n$";
-//    Match match = Regex.Match(input, pattern, RegexOptions.Singleline);
-
-//    if (match.Success)
-//    {
-//        return match.Groups[1].Value;
-//    }
-//    else
-//    {
-//        return string.Empty; // Or throw an exception if no match is found
 //    }
 //}
