@@ -2,6 +2,7 @@
 using API.Entities;
 using API.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Any;
 
 namespace API.Data
 {
@@ -61,15 +62,20 @@ namespace API.Data
 
         public async Task<List<MenuItem>> GetAllMainMenuItemsByDate(DateTime date)
         {
-            var result = await dbSet.Where(x => x.Date == date.ToString("yyyy-MM-dd") && x.IsMainMeal == true).ToListAsync();
-            return result;
-            
+            var result = await dbSet
+                .Where(x => (x.Date == date.ToString("yyyy-MM-dd") || x.Date == "Any") && x.IsMainMeal == true)
+                .ToListAsync();
+
+            return result.Count > 0 ? result : null;
         }
 
-        public Task<List<MenuItem>> GetAllSideMenuItemsByDate(DateTime date) 
+        public async Task<List<MenuItem>> GetAllSideMenuItemsByDate(DateTime date) 
         {
-            var result = dbSet.Where(x => x.Date == date.ToString("yyyy-MM-dd") && x.IsSideMeal == true).ToListAsync();
-            return result;
+            var result = await dbSet
+                .Where(x => (x.Date == date.ToString("yyyy-MM-dd") || x.Date == "Any") && x.IsMainMeal == true)
+                .ToListAsync();
+
+            return result.Count > 0 ? result : null;
         }
 
         public Task<MenuItem> GetMenuItemByUsername(int id)
